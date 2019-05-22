@@ -161,7 +161,8 @@ namespace EFCore.BulkExtensions
             else
             {
                 PropertyColumnNamesDict = properties.ToDictionary(a => a.Name, b => b.Relational().ColumnName.Replace("]", "]]"));
-                ShadowProperties = new HashSet<string>(properties.Where(p => p.IsShadowProperty).Select(p => p.Relational().ColumnName));
+
+                ShadowProperties = new HashSet<string>(properties.Where(p => p.IsShadowProperty()).Select(p => p.Relational().ColumnName));
                 foreach (var property in properties.Where(p => p.GetValueConverter() != null))
                 {
                     string columnName = property.Relational().ColumnName;
