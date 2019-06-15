@@ -65,7 +65,7 @@ namespace EFCore.BulkExtensions.Tests
             {
                 if (!entity.IsOwned()) // without this exclusion OwnedType would not be by default in Owner Table
                 {
-                    entity.Relational().TableName = entity.ClrType.Name;
+                    entity.SetTableName(entity.ClrType.Name);
                 }
             }
         }

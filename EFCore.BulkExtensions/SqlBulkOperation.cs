@@ -256,11 +256,11 @@ namespace EFCore.BulkExtensions
                 Expression<Func<DbContext, IQueryable<T>>> expression = null;
                 if (tableInfo.BulkConfig.TrackingEntities)
                 {
-                    expression = (ctx) => ctx.Set<T>().FromSql(sqlQuery);
+                    expression = (ctx) => ctx.Set<T>().FromSqlRaw(sqlQuery);
                 }
                 else
                 {
-                    expression = (ctx) => ctx.Set<T>().FromSql(sqlQuery).AsNoTracking();
+                    expression = (ctx) => ctx.Set<T>().FromSqlRaw(sqlQuery).AsNoTracking();
                 }
 
                 var compiled = EF.CompileQuery(expression); // instead using Compiled queries
@@ -293,11 +293,11 @@ namespace EFCore.BulkExtensions
                 Expression<Func<DbContext, IQueryable<T>>> expression = null;
                 if (tableInfo.BulkConfig.TrackingEntities)
                 {
-                    expression = (ctx) => ctx.Set<T>().FromSql(sqlQuery);
+                    expression = (ctx) => ctx.Set<T>().FromSqlRaw(sqlQuery);
                 }
                 else
                 {
-                    expression = (ctx) => ctx.Set<T>().FromSql(sqlQuery).AsNoTracking();
+                    expression = (ctx) => ctx.Set<T>().FromSqlRaw(sqlQuery).AsNoTracking();
                 }
                 var compiled = EF.CompileAsyncQuery(expression);
                 var existingEntities = (await compiled(context).ToListAsync().ConfigureAwait(false));
@@ -330,8 +330,8 @@ namespace EFCore.BulkExtensions
             {
                 if (entityPropertiesDict.ContainsKey(property.Name))
                 {
-                    var relational = entityPropertiesDict[property.Name].Relational();
-                    string columnName = relational.ColumnName;
+                    var entityProperty = entityPropertiesDict[property.Name];
+                    string columnName = entityProperty.GetColumnName();
                     var propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
 
                     if (tableInfo.ConvertibleProperties.ContainsKey(columnName))
@@ -358,7 +358,7 @@ namespace EFCore.BulkExtensions
                     {
                         if (!ownedEntityProperty.IsPrimaryKey())
                         {
-                            string columnName = ownedEntityProperty.Relational().ColumnName;
+                            string columnName = ownedEntityProperty.GetColumnName();
                             if (tableInfo.PropertyColumnNamesDict.ContainsValue(columnName))
                             {
                                 ownedEntityPropertyNameColumnNameDict.Add(ownedEntityProperty.Name, columnName);
@@ -397,7 +397,7 @@ namespace EFCore.BulkExtensions
 
                     if (entityPropertiesDict.ContainsKey(property.Name))
                     {
-                        string columnName = entityPropertiesDict[property.Name].Relational().ColumnName;
+                        string columnName = entityPropertiesDict[property.Name].GetColumnName();
                         if (tableInfo.ConvertibleProperties.ContainsKey(columnName))
                         {
                             propertyValue = tableInfo.ConvertibleProperties[columnName].ConvertToProvider.Invoke(propertyValue);
